@@ -1,6 +1,6 @@
 import Sidebar from '../components/Sidebar.js'
 
-const chat = () =>{
+const Chat = () =>{
 
     return(
     <>
@@ -9,4 +9,4 @@ const chat = () =>{
     )
 }
 
-export default chat;
+export default Chat;
