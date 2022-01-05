@@ -2,20 +2,25 @@ import styled from 'styled-components'
 import Head from "next/head"
 import Sidebar from "../../components/Sidebar.js"
 import ChatScreen from "../../components/ChatScreen.js"
-import { db } from "../../firebase.js"
-import { doc, getDoc, collection, query, orderBy } from 'firebase/firestore'
+import { db, auth } from "../../firebase.js"
+import { doc, getDoc, collection, query, orderBy, getDocs } from 'firebase/firestore'
+import { useAuthState }  from "react-firebase-hooks/auth"
+import getRecipientEmail from "../../utils/getRecipientEmail.js"
 
 function Chat({chat,messages}) {
 
+    const [user] = useAuthState(auth)
+
     console.log(chat, messages)
+
     return (
         <Container>
             <Head>
-                <title>Chat</title>
+                <title>Chat with {chat.users&&getRecipientEmail(chat.users,user)}</title>
             </Head>
             <Sidebar/>
             <ChatContainer>
-                <ChatScreen/>
+                <ChatScreen chat={chat} messages={messages}/>
             </ChatContainer>
 
         </Container>
@@ -24,35 +29,49 @@ function Chat({chat,messages}) {
 
 export default Chat
 
-/* TODO: Fix Error 
+
 export async function getServerSideProps(context){
-    const ref = doc(db,'chats',context.query.id);
+    const chatRef = doc(db,'chats',context.query.id);
    
     // prepare the messages on the server
-    const messagesRef = await getDoc(ref,orderBy("timestamp","asc"))
-    
-    const messages = messagesRef.map(doc=>({
-        id: doc.id,
-        ...doc.data(),
-    })).map(msg=>({
-        ...msg,
-        timestamp: msg.timestamp.toDate().getTime()
-    }))
+    const chatDoc = await getDoc(chatRef,orderBy("timestamp","asc"))
 
-    const chatRes = await ref.get();
+    
     const chat = {
-        id: chatRes,
-        ...chatRes.data()
+        id: chatDoc?.id,
+        ...chatDoc?.data(),
     }
+
+    // console.log(chat);
+    
+    const querySnapshot = await getDocs(collection(chatRef,'messages'))
+    
+    const messages = [];
+
+    querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        // console.log(doc.id, " => ", doc.data());
+        messages.push({
+
+            id: doc.id,
+            timestamp:doc.data().timestamp?.toDate().getTime(),
+            ...doc.data(),
+
+        })
+        
+    });
+
+    // console.log(messages);
+    
     
     return{
         props:{
-           // messages: JSON.stringify(messages),
-           // chat: chat
+            chat: JSON.stringify(chat),
+            messages: JSON.stringify(messages),
         }
     }
 }
-*/
+
 const Container = styled.div`
     display: flex;
     flex-direction: row;
