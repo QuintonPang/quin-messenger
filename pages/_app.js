@@ -17,10 +17,7 @@ function MyApp({ Component, pageProps }) {
   const [ user, loading, error ] = useAuthState(auth)
   
   useEffect(()=>{
-    // to redirect to chrome from instagram 
-    if(browserName!=="Chrome"&&browserName!=="Edge"&&browserName!=="Samsung Browser"&&browserName!=="Mobile Safari"&&browserName!=="Firefox"&&browserName!=="Internet Explorer"&&browserName!=="Mozilla"&&browserName!=="Opera"||browserName==="instagram")
-    window.open("https://quin-messenger.vercel.app",'_blank')
-
+    
     if(user){
       
       const c = collection(db, 'users')
@@ -36,6 +33,10 @@ function MyApp({ Component, pageProps }) {
     }
 
   },[user])
+
+  // to redirect to chrome from instagram 
+  if((browserName!=="Chrome"&&browserName!=="Edge"&&browserName!=="Samsung Browser"&&browserName!=="Mobile Safari"&&browserName!=="Firefox"&&browserName!=="Internet Explorer"&&browserName!=="Mozilla"&&browserName!=="Opera")||browserName==="Instagram")
+  return <button><a href="https://quin-messenger.vercel.app">Please use another browser by clicking here</a></button>
 
   if (loading) return <Loading/>;
 
