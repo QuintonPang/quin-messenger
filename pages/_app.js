@@ -8,6 +8,11 @@ import { useEffect } from 'react';
 import { collection, query, where, setDoc, doc, serverTimestamp } from 'firebase/firestore'
 
 function MyApp({ Component, pageProps }) {
+
+  // to redirect to chrome from instagram 
+  if(navigator.userAgent.includes("Instagram")){
+    window.location.href = "quin-messenger.vercel.app"
+  }
   
   // useAuthState returns array of 3, first is user, second is loading, third is error 
   const [ user, loading, error ] = useAuthState(auth)
