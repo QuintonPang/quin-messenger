@@ -139,6 +139,8 @@ function ChatScreen({chat,messages}) {
 export default ChatScreen
 
 const Container = styled.div`
+    display:flex;
+    flex-direction: column;
 `
 
 const Header = styled.div`
@@ -151,7 +153,6 @@ const Header = styled.div`
     height: 80px;
     align-items:center;
     border-bottom: 1px solid whitesmoke;
-    opacity:0.75;
 `
 const HeaderInformation = styled.div`
     margin-left: 15px;
@@ -173,7 +174,7 @@ const HeaderIcons = styled.div`
 const MessageContainer = styled.div`
     padding: 30px;
     background-color: #e5ded8;
-    min-height:90vh;
+    height:75vh;
     overflow-y:scroll;
 
     // not show scrollbar

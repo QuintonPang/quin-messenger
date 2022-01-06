@@ -23,7 +23,7 @@ const Sidebar = () =>{
     const createChat = () =>{
         const input = prompt("Please enter an email address you want to chat with: ");
         if (!input) return null;
-        console.log(chatAlreadyExists(input));
+        // console.log(chatAlreadyExists(input));
         if(EmailValidator.validate(input) && !chatAlreadyExists(input) && input!==user.email){
             const c = collection(db,'chats');
             
@@ -33,6 +33,10 @@ const Sidebar = () =>{
                 users: [user.email, input] // sender and recepient
 
             })
+
+            alert("New chat created!")
+        }else{
+            alert("User already exists in your chat list!")
         }
 
     }
@@ -58,7 +62,7 @@ const Sidebar = () =>{
                     <IconButton>
                       <ChatIcon/>
                     </IconButton>
-                    <IconButton sx={{color:"red"}} onClick={()=>auth.signOut()}>
+                    <IconButton sx={{color:"red"}} onClick={()=>{confirm("Log out?")&&auth.signOut()}}>
                       <LogoutIcon/>
                     </IconButton>
                 </IconsContainer>

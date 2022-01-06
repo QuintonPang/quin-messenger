@@ -74,7 +74,6 @@ backgroundAnimation{
     display: grid;
     place-items: center;
     height: 100vh;
-    cursor:pointer;
     transition: color 0.5s;
     background: linear-gradient(var(--c1),var(--c2));
     animation: backgroundAnimation 8s;
