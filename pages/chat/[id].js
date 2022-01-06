@@ -11,7 +11,7 @@ function Chat({chat,messages}) {
 
     const [user] = useAuthState(auth)
 
-    console.log(chat, messages)
+    // console.log(chat, messages)
 
     return (
         <Container>
