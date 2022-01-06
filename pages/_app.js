@@ -6,18 +6,21 @@ import Loading from "../components/Loading.js"
 import firebase from "firebase/compat/app"
 import { useEffect } from 'react';
 import { collection, query, where, setDoc, doc, serverTimestamp } from 'firebase/firestore'
+import {browserName} from 'react-device-detect'
 
 function MyApp({ Component, pageProps }) {
 
-  // to redirect to chrome from instagram 
-  if(navigator.userAgent.includes("Instagram")){
-    window.location.href = "quin-messenger.vercel.app"
-  }
+  console.log(browserName);
+
   
   // useAuthState returns array of 3, first is user, second is loading, third is error 
   const [ user, loading, error ] = useAuthState(auth)
   
   useEffect(()=>{
+    // to redirect to chrome from instagram 
+    if(browserName!=="Chrome"&&browserName!=="Edge"&&browserName!=="Samsung Browser"&&browserName!=="Mobile Safari"&&browserName!=="Firefox"&&browserName!=="Internet Explorer"&&browserName!=="Mozilla"&&browserName!=="Opera"||browserName==="instagram")
+    window.open("https://quin-messenger.vercel.app",'_blank')
+
     if(user){
       
       const c = collection(db, 'users')
