@@ -9,9 +9,13 @@ import { collection, addDoc, where, query } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useCollection } from 'react-firebase-hooks/firestore'
 import Chat from './Chat.js'
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useState } from "react"
+import getRecipientEmail from '../utils/getRecipientEmail.js'
 
 const Sidebar = () =>{
 
+    const [ wordToBeSearched, setWordToBeSearched ] = useState("")
     const [ user ] = useAuthState(auth);
     const q = query(collection(db,'chats'),where('users','array-contains',user.email))
     const [ chatsSnapshot ] = useCollection(q)
@@ -46,7 +50,7 @@ const Sidebar = () =>{
     return(
         <Container>
            <Header>
-                <UserAvatar src={user.photoURL} onClick={()=>auth.signOut()}/>
+                <UserAvatar src={user.photoURL} />
                 <IconsContainer>
                     <IconButton>
                       <MoreVert/>
@@ -54,22 +58,26 @@ const Sidebar = () =>{
                     <IconButton>
                       <ChatIcon/>
                     </IconButton>
+                    <IconButton sx={{color:"red"}} onClick={()=>auth.signOut()}>
+                      <LogoutIcon/>
+                    </IconButton>
                 </IconsContainer>
             </Header> 
 
             <Search>
                 <SearchIcon/>
-                <SearchInput onClick={()=>createChat()} placeholder="Search in chat"/>
+                <SearchInput value={wordToBeSearched} onChange={(e)=>setWordToBeSearched(e.target.value)} placeholder="Search in chat"/>
             </Search>
 
-            <SidebarButton>
+            <SidebarButton sx={{"&:hover":{backgroundColor:"#f2d5f2",color:"White"},color:"pink"}} onClick={()=>createChat()}>
                 START A NEW CHAT
             </SidebarButton>
 
             {/*List of chats*/}
-            {chatsSnapshot?.docs.map(chat=>
+            {chatsSnapshot?.docs.map(chat=>{
+                return chat.data().users.find((u)=>u===getRecipientEmail(chat.data().users,user)).includes(wordToBeSearched)&&(
                 <Chat key={chat.id} id={chat.id} users={chat.data().users} />
-            )}
+            )})}
 
         </Container>
     )
@@ -78,7 +86,12 @@ const Sidebar = () =>{
 export default Sidebar;
 
 const Container = styled.div`
-
+    flex: 0.45;
+    border-right: 1px solid whitesmoke;
+    height: 100vh;
+    min-width: 300px;
+    min-height: 350px;
+    overflow-y: scroll;
 `;
 
 const Header = styled.div`

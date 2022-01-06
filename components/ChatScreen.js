@@ -5,18 +5,26 @@ import { Avatar, IconButton } from "@mui/material"
 import { useAuthState } from "react-firebase-hooks/auth"
 import MoreVert from '@mui/icons-material/MoreVert'
 import AttachFileIcon from "@mui/icons-material/AttachFile"
-import { addDoc, setDoc, doc, getDoc, collection, query, orderBy, getDocs, serverTimestamp } from 'firebase/firestore'
+import { query, addDoc, setDoc, doc,  where, collection,orderBy, serverTimestamp } from 'firebase/firestore'
 import Message from "./Message.js"
 import { InsertEmoticon } from '@mui/icons-material'
-import { useState } from "react"
+import { useState, useRef } from "react"
+import { useCollection } from "react-firebase-hooks/firestore"
+import getRecipientEmail from "../utils/getRecipientEmail.js"
+import TimeAgo from 'timeago-react'
 
 function ChatScreen({chat,messages}) {
 
+    const endOfMessagesRef = useRef(null);
+
     const router = useRouter();
     const [ input, setInput ] = useState();
+    const [ user ] = useAuthState(auth)
+    
     const sendMessage = (e)=>{
         e.preventDefault();
         
+
         const userCollection = collection(db, 'users')
         
         // update last seen
@@ -27,29 +35,44 @@ function ChatScreen({chat,messages}) {
         )
         const messageCollection = collection(db,"chats",router.query.id,"messages")
         addDoc(messageCollection,{
-           timestamp: serverTimestamp(),
-           text: input,
+            user: user.email,
+            timestamp: serverTimestamp(),
+            text: input,
+            photoURL: user.photoURL,
         })
 
         setInput("")
+        scrollToBottom()
     }
+
+    const chatRef = doc(db,'chats',router.query.id);
+    // returns something even if no data is found
+    const [ messagesSnapshot ] = useCollection(query(collection(chatRef,'messages'),orderBy("timestamp","asc")))
+    const [ recipientSnapshot ] = useCollection(
+        query(collection(db,
+                "users"),
+                where("email","==",getRecipientEmail(JSON.parse(chat).users,user))
+                )
+        )
+    
+    const scrollToBottom = () =>{
+        endOfMessagesRef?.current?.scrollIntoView({
+            behaviour:"smooth",
+            block:"start",
+        })
+    }
+
     const showMessages = () =>{
-        const chatRef = doc(db,'chats',router.query.id);
-        getDocs(collection(chatRef,'messages'),orderBy("timestamp","asc")).then((messagesSnapshot)=>{
+
         if(messagesSnapshot){
-            let messages = []
-            messagesSnapshot.forEach(doc=>{
-                messages.push(doc)
-            } )
-            messages.map(msg=>{
-                return
-                <Message 
-                key={msg.id} 
-                user={msg.data().user} 
+           
+            return messagesSnapshot.docs.map(msg=>
+                <Message
+                key={msg.id}
+                user={msg.data().user}
                 message={{...msg.data(),timestamp:msg.data().timestamp?.toDate().getTime()}}
                 />
-            })
-
+                )
     
         }else{
             // server-side rendered
@@ -60,17 +83,30 @@ function ChatScreen({chat,messages}) {
                 message={{...msg}}
                 />
             )
-        }})
+        }
+    
+    
     }
 
-    const [ user ] = useAuthState(auth)
+
+    // chat is in json format
+    // console.log(JSON.parse(chat).users)
+
+    const recipient = recipientSnapshot?.docs?.[0]?.data()
+  
+    const recipientEmail = getRecipientEmail(JSON.parse(chat).users,user)
     return (
         <Container>
             <Header>
-                <Avatar/>
+                {recipient?
+                <Avatar src={recipient.photoURL}/>:
+                <Avatar>{recipientEmail[0]}</Avatar>}
                 <HeaderInformation>
-                    <h3>Rec Email</h3>
-                    <p>Last seen...</p>
+                    <h3>{recipientEmail}</h3>
+                    {recipientSnapshot?
+                    <p>Last seen:{" "} {recipient?.lastSeen?.toDate()?<TimeAgo datetime={recipient?.lastSeen?.toDate()}/>:"Unavailable"}</p>
+                    :<p>Loading last seen...</p>
+                    }
                 </HeaderInformation>
                 <HeaderIcons>
                     <IconButton>
@@ -86,10 +122,13 @@ function ChatScreen({chat,messages}) {
                 {showMessages()}
 
                 {/* scrolls to bottom trick*/}
-                <EndOfMessages/>
+                <EndOfMessages ref={endOfMessagesRef}/>
+                {scrollToBottom()}
             </MessageContainer>
             <InputContainer>
-                <InsertEmoticon/>
+                    <IconButton>
+                        <InsertEmoticon/>
+                    </IconButton>
                 <Input value={input} onChange={(e)=>setInput(e.target.value)}/>
                 <button hidden disabled={!input} type="submit" onClick={(e)=>sendMessage(e)}>Send Message</button>
             </InputContainer>
@@ -105,7 +144,7 @@ const Container = styled.div`
 const Header = styled.div`
     position: sticky;
     background-color: white;
-    z-index:100px;
+    z-index:100;
     top:0;
     display:flex;
     padding:11px;
@@ -134,6 +173,7 @@ const MessageContainer = styled.div`
     padding: 30px;
     background-color: #e5ded8;
     min-height:90vh;
+    overflow-y:scroll;
 
     // not show scrollbar
     ::-webkit-scrollbar{
@@ -145,6 +185,7 @@ const MessageContainer = styled.div`
 `
 
 const EndOfMessages = styled.div`
+    margin-bottom:5px;
 `
 
 const InputContainer = styled.form`
