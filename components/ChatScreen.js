@@ -151,6 +151,7 @@ const Header = styled.div`
     height: 80px;
     align-items:center;
     border-bottom: 1px solid whitesmoke;
+    opacity:0.75;
 `
 const HeaderInformation = styled.div`
     margin-left: 15px;
