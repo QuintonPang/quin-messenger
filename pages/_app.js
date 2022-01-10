@@ -39,7 +39,12 @@ function MyApp({ Component, pageProps }) {
   
   // to redirect to chrome from instagram 
   if((browserName!=="Chrome"&&browserName!=="Edge"&&browserName!=="Samsung Browser"&&browserName!=="Mobile Safari"&&browserName!=="Firefox"&&browserName!=="Internet Explorer"&&browserName!=="Mozilla"&&browserName!=="Opera")||browserName==="Instagram")
-  return <button><a href="https://quin-messenger.vercel.app" download>Please use another browser by clicking here</a></button>
+  return (
+    <>
+      {"Current browser: "+browserName+"\n"}
+      <button><a href="https://quin-messenger.vercel.app" download>Please use another browser by clicking here</a></button>
+    </>
+  )
 
   if(!user) return <Login/>;
 
