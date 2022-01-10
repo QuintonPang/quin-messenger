@@ -38,7 +38,7 @@ function MyApp({ Component, pageProps }) {
   if (loading) return <Loading/>;
   
   // to redirect to chrome from instagram 
-  if((browserName!=="Chrome"&&browserName!=="Edge"&&browserName!=="Samsung Browser"&&browserName!=="Mobile Safari"&&browserName!=="Firefox"&&browserName!=="Internet Explorer"&&browserName!=="Mozilla"&&browserName!=="Opera")||browserName==="Instagram")
+  if(browserName==="Instagram")
   return (
     <>
       {"Current browser: "+browserName+"\n"}
